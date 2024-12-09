@@ -1,93 +1,112 @@
 import math
-import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import random
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.keys import Keys
 
-listaEdades = [22, 34, 45, 27, 31, 29, 40, 50, 60, 70, 
-               25, 35, 55, 65, 75, 20, 30, 40, 50, 60, 
-               32, 42, 52, 62, 72, 28, 38, 48, 58, 68]
-listaPesos = [70.5, 80.2, 90.3, 60.4, 75.5, 85.6, 95.7, 
-              65.8, 55.9, 45.0, 68.1, 78.2, 88.3, 58.4, 
-              48.5, 72.6, 82.7, 92.8, 62.9, 52.0, 
-              74.1, 84.2, 94.3, 64.4, 54.5, 76.6, 
-              86.7, 96.8, 66.9, 56.0]
-listaAlturas = [1.75, 1.80, 1.85, 1.60, 1.65, 1.70, 
-                1.90, 1.95, 1.55, 1.50, 1.78, 1.83, 
-                1.88, 1.63, 1.68, 1.73, 1.93, 1.98, 
-                1.53, 1.48, 1.77, 1.82, 1.87, 1.62, 
-                1.67, 1.72, 1.92, 1.97, 1.52, 1.47]
-listaSueldos = [3000, 4500, 6000, 3500, 5000, 6500, 
-                 4000, 5500, 7000, 7500, 3200, 4700, 
-                 6200, 3700, 5200, 6700, 4200, 5700, 
-                 7200, 7700, 3400, 4900, 6400, 3900, 
-                 5400, 6900, 4400, 5900, 7400, 7900]
-listaSexosH = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 
-                0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 
-                0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
-listaSexosM = [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 
-                1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 
-                1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+# Configuración del navegador
+firefox_options = Options()
+firefox_options.set_preference("dom.webdriver.enabled", False)
+firefox_options.set_preference(
+    "general.useragent.override", 
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.110 Safari/537.36"
+)
 
-Status = ['paga', 'no paga', 'paga', 'no paga', 'paga', 
-                'no paga', 'paga', 'no paga', 'paga', 
-                'no paga', 'paga', 'no paga', 'paga', 
-                'no paga', 'paga', 'no paga', 'paga', 
-                'no paga', 'paga', 'no paga', 'paga', 
-                'no paga', 'paga', 'no paga', 'paga', 
-                'no paga', 'paga', 'no paga', 'paga', 
-                'no paga']
+driver = webdriver.Firefox(options=firefox_options)
+driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+# Iniciar sesión en Gmail
+driver.get("https://mail.google.com/")
+time.sleep(random.uniform(8, 12))
+
+correo = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'identifierId')))
+correo.send_keys('l211080120@iztapalapa.tecnm.mx')
+time.sleep(5)
+
+bttnNex = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, 'identifierNext')))
+bttnNex.click()
+time.sleep(random.uniform(4, 6))
+
+input("Por favor, resuelve el captcha y presiona Enter para continuar...")
+
+contraseña = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'Passwd')))
+contraseña.send_keys('montserrat12')
+time.sleep(15)
+
+bttnLogin = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.BqKGqe.Jskylb.TrZEUc.lw1w4b')))
+bttnLogin.click()
+time.sleep(random.uniform(8, 12))
+
+# Primer correo
+primerCorreo = WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located((By.XPATH, '(//tr[contains(@class, "zA")])[1]'))
+)
+
+driver.execute_script("arguments[0].scrollIntoView(true);", primerCorreo)
+time.sleep(1)
+ActionChains(driver).move_to_element(primerCorreo).click().perform()
+time.sleep(5)
+
+contenedorCorreo = WebDriverWait(driver, 20).until(
+    EC.presence_of_element_located((By.XPATH, '//div[contains(@id, "main")]'))
+)
+
+etiquetai = contenedorCorreo.find_elements(By.TAG_NAME, "i")
+textocorreo1 = [etiqueta.text.strip() for etiqueta in etiquetai]
+
+# Regresar a la bandeja de entrada
+bandejaEntrada = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.XPATH, '//div[@data-tooltip="Recibidos"]'))
+)
+bandejaEntrada.click()
+time.sleep(15)
+
+# Segundo correo
+segundoCorreo = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.XPATH, '(//tr[contains(@class, "zA")])[2]'))
+)
+
+driver.execute_script("arguments[0].scrollIntoView(true);", segundoCorreo)
+time.sleep(1)
+ActionChains(driver).move_to_element(segundoCorreo).click().perform()
+time.sleep(5)
+
+contenidoCorreo2 = WebDriverWait(driver, 20).until(
+    EC.presence_of_element_located((By.XPATH, '//td[contains(@style, "font-family:Roboto")]'))
+)
+
+textoCorreo2 = contenidoCorreo2.text.strip()
 
 
-def normalizar(lista):
-
-    min_val = min(lista)
-    max_val = max(lista)
-    if max_val == min_val:
-        return [0] * len(lista)
-    return [(i - min_val) / (max_val - min_val) for i in lista]
+f1 = textocorreo1 
+f2 = textoCorreo2.split()  
 
 
-edadNormalizada = normalizar(listaEdades)
-pesoNormalizado = normalizar(listaPesos)
-alturaNormalizada = normalizar(listaAlturas)
-sueldoNormalizado = normalizar(listaSueldos)
-sexoHNormalizado = normalizar(listaSexosH)
+listaUnida = list(set(f1 + f2))  
+
+F1 = [1 if palabra in f1 else 0 for palabra in listaUnida]
+F2 = [1 if palabra in f2 else 0 for palabra in listaUnida]
+
+sumaFraces = sum(f1 * f2 for f1, f2 in zip(F1, F2))
+
+magnitud1 = math.sqrt(sum(f1 for f1 in F1))
+magnitud2 = math.sqrt(sum(f2 for f2 in F2))
+similitud = sumaFraces / (magnitud1 * magnitud2)
 
 
-print('TABLA DE DATOS INICIALES')
-df_tabla=pd.DataFrame({'Edad':listaEdades,'Peso':listaPesos,'Altura':listaAlturas,'Sueldo':listaSueldos,'Sexo H':listaSexosH,'Sexo M':listaSexosM,'Status':Status})
-print(df_tabla)
-
-print('TABLA DE DATOS NORMALIZADOS')
-df_tabla_normalizada=pd.DataFrame({'Edad':edadNormalizada,'Peso':pesoNormalizado,'Altura':alturaNormalizada,'Sueldo':sueldoNormalizado,'Sexo H':listaSexosH,'Sexo M':listaSexosM})
-print(df_tabla_normalizada)
-
-#CREAR GRUPOS
-cantidadGrupos = int(input('Ingrese la cantidad de grupos: '))
-filasAleatorias = df_tabla_normalizada.sample(n=cantidadGrupos, random_state=1).index
-
-
-df_tabla_normalizada['Grupo'] =0  
-for i, fila in enumerate(filasAleatorias):
-    df_tabla_normalizada.at[fila, 'Grupo'] = i + 1  
-
-print('\nLista de personas con grupos asignados:')
-print(df_tabla_normalizada)
-
-#CALCULAR DISTANCIAS ENTRE GRUPOS
-def calcularDistancias():
-    for grupo in range(1, cantidadGrupos + 1):
-     df_tabla_normalizada[f'Distancia_Grupo_{grupo}'] 
-
-    df_grupo = df_tabla_normalizada[df_tabla_normalizada['Grupo'] != 0]
-    df_sinGrupo = df_tabla_normalizada[df_tabla_normalizada['Grupo'] == 0]
-
-    for filaSinGrupo in df_sinGrupo.iterrows():
-       for filaGrupo in df_grupo.iterrows():
-          grupo = filaGrupo['Grupo']
-          distancias = math.sqrt((filaSinGrupo['Edad'] - filaGrupo['Edad'])**2 + 
-                                 (filaSinGrupo['Peso'] - filaGrupo['Peso'])**2 + 
-                                 (filaSinGrupo['Altura'] - filaGrupo['Altura'])**2 + 
-                                 (filaSinGrupo['Sueldo'] - filaGrupo['Sueldo'])**2 + 
-                                 (filaSinGrupo['Sexo H'] - filaGrupo['Sexo H'])**2 +
-                                 (filaSinGrupo['Sexo M'] - filaGrupo['Sexo M'])**2
-                                 )
-          df_tabla_normalizada.at[filaSinGrupo, f'Distancia_Grupo_{grupo}'] = distancias
+print("/////////////////////////////////////////////////")
+print("PAGINA1: ", f1)
+print("/////////////////////////////////////////////////")
+print("PAGINA2: ", f2)
+#print("/////////////////////////////////////////////////")
+#print("Lista unida: ", listaUnida)
+#print("/////////////////////////////////////////////////")
+#print("frase 1:", F1)
+#print("frase 2:", F2)   
+#print(f"Similitud: {similitud:.2f}")
+#print(f"Similitud en porcentaje: {similitud*100:.2f}%")
